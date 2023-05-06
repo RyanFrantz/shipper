@@ -46,6 +46,7 @@ export const handler: Handlers = {
           headers.set("content-type", "application/json");
           headers.set("authorization", `Bearer ${botToken}`);
           const { text, user, channel } = eventBody.event;
+          console.log(`text: ${text} user: ${user} channel: ${channel}`);
           // We likely need an expression to match the bot's ID explicitly so
           // that we can filter it out and avoid an app_mention loop condition.
           const re = /(?<user_id>^<.+>\s)(?<user_message>.+$)/;
