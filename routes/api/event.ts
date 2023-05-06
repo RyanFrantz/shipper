@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 
 // TODO: Read this from an env var.
-const botToken = "token: xoxb-2174126344-5225423913652-2Grd4b7Y1WR9TjKKfa5hwQ8V";
+const botToken = "xoxb-2174126344-5225423913652-2Grd4b7Y1WR9TjKKfa5hwQ8V";
 
 // Handle Slack events we've subscribed to.
 // TODO: Add support for 'url_verification' and 'app_mention' events.
