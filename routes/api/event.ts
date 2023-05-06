@@ -63,6 +63,7 @@ export const handler: Handlers = {
               body: JSON.stringify(msg)
             }
           );
+          console.log(slackResp);
           // TODO: Test slackResp for ok-ness.
         }
         // Reply 200 OK all the time.
