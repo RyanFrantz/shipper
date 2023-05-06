@@ -20,6 +20,21 @@ export const handler: Handlers = {
       );
     }
     console.log(eventBody);
+    // Verify a Slack challenge. We'll see these when initially setting up
+    // the Slack app.
+    // https://api.slack.com/apis/connections/events-api#challenge
+    if (eventBody.type == "url_verification") {
+      const headers = new Headers;
+      headers.set("content-type", "application/json");
+      const msg = { challenge: eventBody.challenge };
+      return new Response(
+        JSON.stringify(msg),
+        {
+          headers: headers,
+          status: 200
+        }
+      )
+    }
     return new Response(); // Simple 200 OK
   },
 };
