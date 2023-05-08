@@ -20,7 +20,7 @@ const isValidSlackEvent = (body, headers): boolean => {
   // FIXME: Grab this from the environment.
   const signingSecret = "43c891e7a822a9f3a2055e7367ac3c51";
   const baseString = `${slackHashVersion}:${timestamp}:${bodyAsString}`
-  calculatedHash = hmac("sha256", signingSecret, baseString, "utf8", "hex");
+  const calculatedHash = hmac("sha256", signingSecret, baseString, "utf8", "hex");
   console.log(calculatedHash);
 };
 
