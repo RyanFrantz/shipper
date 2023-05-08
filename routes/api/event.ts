@@ -1,5 +1,4 @@
 import { Handlers } from "$fresh/server.ts";
-import { Buffer } from "https://deno.land/std@0.186.0/io/buffer.ts";
 import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 // TODO: Read this from an env var.
@@ -9,7 +8,7 @@ const isValidSlackEvent = (body, headers): boolean => {
   // Let's start sniffing out the X-Slack-Signature header.
   console.log(headers);
   console.log(body);
-  const bodyAsString = Buffer.from(JSON.stringify(body)).toString();
+  const bodyAsString = new TextEncoder().encode(JSON.stringify(body)).toString();
   const timestamp = headers.get("x-slack-request-timestamp");
   const slackSignature = headers.get("x-slack-signature");
   if (!timestamp || !slackSignature) {
