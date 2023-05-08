@@ -22,6 +22,8 @@ export const handler: Handlers = {
         }
       );
     }
+    // Let's start sniffing out the X-Slack-Signature header.
+    console.log(req.headers);
     console.log(eventBody);
     // Verify a Slack challenge. We'll see these when initially setting up
     // the Slack app.
@@ -46,7 +48,6 @@ export const handler: Handlers = {
           headers.set("content-type", "application/json");
           headers.set("authorization", `Bearer ${botToken}`);
           const { text, user, channel } = eventBody.event;
-          console.log(`text: ${text} user: ${user} channel: ${channel}`);
           // We likely need an expression to match the bot's ID explicitly so
           // that we can filter it out and avoid an app_mention loop condition.
           const re = /(?<user_id>^<.+>\s)(?<user_message>.+$)/;
