@@ -8,7 +8,7 @@ const isValidSlackEvent = (body, headers): boolean => {
   // Let's start sniffing out the X-Slack-Signature header.
   console.log(headers);
   console.log(body);
-  const bodyAsString = JSON.stringify(body);
+  const bodyAsString = Buffer.from(JSON.stringify(body)).toString();
   const timestamp = headers.get("x-slack-request-timestamp");
   const slackSignature = headers.get("x-slack-signature");
   if (!timestamp || !slackSignature) {
