@@ -43,7 +43,7 @@ export const handler: Handlers = {
         }
       );
     }
-    isValidSlackEvent(eventBody, req,headers);
+    isValidSlackEvent(eventBody, req.headers);
     // Verify a Slack challenge. We'll see these when initially setting up
     // the Slack app.
     // https://api.slack.com/apis/connections/events-api#challenge
