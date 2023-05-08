@@ -1,7 +1,28 @@
 import { Handlers } from "$fresh/server.ts";
+import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 // TODO: Read this from an env var.
 const botToken = "xoxb-2174126344-5225423913652-2Grd4b7Y1WR9TjKKfa5hwQ8V";
+
+const isValidSlackEvent = (body, headers): boolean => {
+  // Let's start sniffing out the X-Slack-Signature header.
+  console.log(headers);
+  console.log(body);
+  const bodyAsString = body.toString();
+  const timestamp = headers.get("x-slack-request-timestamp");
+  const slackSignature = headers.get("x-slack-signature");
+  if (!timestamp || !slackSignature) {
+    console.log("Missing one or more expected Slack HTTP headers");
+    return false;
+  }
+  const [slackHashVersion, slackHash] = slackSignature.split("=");
+  // TODO: Verify the timestamp is < 5 min old.
+  // FIXME: Grab this from the environment.
+  const signingSecret = "43c891e7a822a9f3a2055e7367ac3c51";
+  const baseString = `${slackHashVersion}:${timestamp}:${bodyAsString}`
+  calculatedHash = hmac("sha256", signingSecret, baseString, "utf8", "hex");
+  console.log(calculatedHash);
+};
 
 // Handle Slack events we've subscribed to.
 // TODO: Add support for 'url_verification' and 'app_mention' events.
@@ -22,9 +43,7 @@ export const handler: Handlers = {
         }
       );
     }
-    // Let's start sniffing out the X-Slack-Signature header.
-    console.log(req.headers);
-    console.log(eventBody);
+    isValidSlackEvent(eventBody, req,headers);
     // Verify a Slack challenge. We'll see these when initially setting up
     // the Slack app.
     // https://api.slack.com/apis/connections/events-api#challenge
