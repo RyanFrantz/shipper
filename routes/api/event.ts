@@ -8,8 +8,7 @@ const isValidSlackEvent = (body, headers): boolean => {
   // Let's start sniffing out the X-Slack-Signature header.
   console.log(headers);
   console.log(body);
-  const bodyAsString = body.toString();
-  console.log(bodyAsString); // Prob same as above if toString() is called explicitly.
+  const bodyAsString = JSON.stringify(body);
   const timestamp = headers.get("x-slack-request-timestamp");
   const slackSignature = headers.get("x-slack-signature");
   if (!timestamp || !slackSignature) {
@@ -21,6 +20,7 @@ const isValidSlackEvent = (body, headers): boolean => {
   // FIXME: Grab this from the environment.
   const signingSecret = "43c891e7a822a9f3a2055e7367ac3c51";
   const baseString = `${slackHashVersion}:${timestamp}:${bodyAsString}`
+  console.log(`baseString: ${baseString}`);
   const calculatedHash = hmac("sha256", signingSecret, baseString, "utf8", "hex");
   console.log(`Calculated: ${calculatedHash}`);
   console.log(`From Slack: ${slackHash}`);
@@ -32,8 +32,7 @@ export const handler: Handlers = {
   async POST(req) {
     let eventBody;
     try {
-      //eventBody = await req.json();
-      eventBody = await req.arrayBuffer();
+      eventBody = await req.json();
     } catch (err) {
       const headers = new Headers;
       headers.set("content-type", "application/json");
@@ -46,7 +45,6 @@ export const handler: Handlers = {
         }
       );
     }
-    eventBody = JSON.parse(new TextDecoder().decode(eventBody)); // chicanery
     isValidSlackEvent(eventBody, req.headers);
     // Verify a Slack challenge. We'll see these when initially setting up
     // the Slack app.
