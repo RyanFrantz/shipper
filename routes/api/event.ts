@@ -66,7 +66,7 @@ export const handler: Handlers = {
           // with a help message illustrating how we work.
           const msg = {
             channel: channel,
-            text: `<@${user}> said: ${match.groups.user_message}`
+            text: `<@${user}> said: \'${match.groups.user_message}\'`
           };
           const slackResponse = await fetch("https://slack.com/api/chat.postMessage",
             {
