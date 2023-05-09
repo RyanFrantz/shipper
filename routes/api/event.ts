@@ -43,6 +43,9 @@ baseResponseHeaders.set("content-type", "application/json");
 // Handle Slack events we've subscribed to.
 export const handler: Handlers = {
   async POST(req) {
+    if (!SLACK_BOT_TOKEN || !SLACK_SIGNING_SECRET) {
+      console.log("WARNING! One or both of SLACK_BOT_TOKEN or SLACK_SIGNING_SECRET is not defined!");
+    }
     let eventBody;
     try {
       eventBody = await req.json();
