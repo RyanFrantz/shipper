@@ -68,7 +68,7 @@ export const handler: Handlers = {
             channel: channel,
             text: `<@${user}> said: ${match.groups.user_message}`
           };
-          const slackResp = await fetch("https://slack.com/api/chat.postMessage",
+          const slackResponse = await fetch("https://slack.com/api/chat.postMessage",
             {
               headers: headers,
               method: "POST",
@@ -76,6 +76,10 @@ export const handler: Handlers = {
             }
           );
           // TODO: Test slackResp for ok-ness.
+          console.log(slackResponse);
+          if (!slackResponse.ok) {
+            console.log(`Error posting message: ${slackResponse.error}`)
+          }
         }
         // Reply 200 OK all the time.
         return new Response(
