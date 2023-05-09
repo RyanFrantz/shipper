@@ -25,6 +25,7 @@ const isValidSlackRequest = (body, headers: Headers): boolean => {
     return false;
   }
   if (old(timestamp)) {
+    console.log(`Slack event has a timestamp (${timestamp}) older than 5 minutes`);
     return false;
   }
 
@@ -33,6 +34,8 @@ const isValidSlackRequest = (body, headers: Headers): boolean => {
   const calculatedHash = hmac("sha256", SLACK_SIGNING_SECRET, baseString, "utf8", "hex");
   if (calculatedHash == slackHash) {
     return true;
+  } else {
+    console.log(`Calculated hash '${calculatedHash}' does not match the received hash '${slackHash}'`);
   }
 
   return false; // Sane default.
