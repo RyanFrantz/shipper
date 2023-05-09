@@ -77,6 +77,7 @@ export const handler: Handlers = {
           );
           // TODO: Test slackResp for ok-ness.
           console.log(slackResponse);
+          console.log(slackResponse.ok);
           if (!slackResponse.ok) {
             console.log(`Error posting message: ${slackResponse.error}`)
           }
