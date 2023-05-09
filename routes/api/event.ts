@@ -4,10 +4,7 @@ import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 // TODO: Read this from an env var.
 const botToken = "xoxb-2174126344-5225423913652-2Grd4b7Y1WR9TjKKfa5hwQ8V";
 
-const isValidSlackEvent = (body, headers): boolean => {
-  // Let's start sniffing out the X-Slack-Signature header.
-  console.log(headers);
-  console.log(body);
+const isValidSlackEvent = (body, headers: Headers): boolean => {
   const bodyAsString = JSON.stringify(body);
   const timestamp = headers.get("x-slack-request-timestamp");
   const slackSignature = headers.get("x-slack-signature");
@@ -20,14 +17,19 @@ const isValidSlackEvent = (body, headers): boolean => {
   // FIXME: Grab this from the environment.
   const signingSecret = "43c891e7a822a9f3a2055e7367ac3c51";
   const baseString = `${slackHashVersion}:${timestamp}:${bodyAsString}`
-  console.log(`baseString: ${baseString}`);
   const calculatedHash = hmac("sha256", signingSecret, baseString, "utf8", "hex");
-  console.log(`Calculated: ${calculatedHash}`);
-  console.log(`From Slack: ${slackHash}`);
+  if (calculatedHash == slackHash) {
+    return true;
+  }
+
+  return false; // Sane default.
 };
 
+// Common response headers we'll use often.
+const baseResponseHeaders = new Headers;
+baseResponseHeaders.set("content-type", "application/json");
+
 // Handle Slack events we've subscribed to.
-// TODO: Add support for 'url_verification' and 'app_mention' events.
 export const handler: Handlers = {
   async POST(req) {
     let eventBody;
@@ -40,12 +42,24 @@ export const handler: Handlers = {
       return new Response(
         JSON.stringify(msg),
         {
-          headers: headers,
+          headers: baseResponseHeaders,
           status: 400
         }
       );
     }
-    isValidSlackEvent(eventBody, req.headers);
+
+    if (!isValidSlackEvent(eventBody, req.headers)) {
+      console.log("Malformed or malicious event!");
+      const msg = { message: "Invalid or malformed input" };
+      return new Response(
+        JSON.stringify(msg),
+        {
+          headers: baseResponseHeaders,
+          status: 400
+        }
+      );
+    }
+
     // Verify a Slack challenge. We'll see these when initially setting up
     // the Slack app.
     // https://api.slack.com/apis/connections/events-api#challenge
@@ -57,16 +71,15 @@ export const handler: Handlers = {
         return new Response(
           JSON.stringify(msg),
           {
-            headers: headers,
+            headers: baseResponseHeaders,
             status: 200
           }
         );
-        break;
+
       case "event_callback":
         const { type } = eventBody.event;
         if (type == "app_mention") {
-          const headers = new Headers;
-          headers.set("content-type", "application/json");
+          const headers = new Headers(baseResponseHeaders);
           headers.set("authorization", `Bearer ${botToken}`);
           const { text, user, channel } = eventBody.event;
           // We likely need an expression to match the bot's ID explicitly so
@@ -86,7 +99,6 @@ export const handler: Handlers = {
               body: JSON.stringify(msg)
             }
           );
-          console.log(slackResp);
           // TODO: Test slackResp for ok-ness.
         }
         // Reply 200 OK all the time.
@@ -96,9 +108,17 @@ export const handler: Handlers = {
             status: 200
           }
         );
-        break;
+
       default:
         console.log("Unknown/unexpected Slack event type.");
+        const unexpected = { message: "Unexpected event type" };
+        return new Response(
+          JSON.stringify(unexpected),
+          {
+            headers: baseResponseHeaders,
+            status: 400
+          }
+        );
     }
     return new Response(); // Simple 200 OK
   },
