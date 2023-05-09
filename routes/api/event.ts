@@ -1,18 +1,20 @@
 import { Handlers } from "$fresh/server.ts";
 import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
-// TODO: Read this from an env var.
-const botToken = "xoxb-2174126344-5225423913652-2Grd4b7Y1WR9TjKKfa5hwQ8V";
+const SLACK_BOT_TOKEN = Deno.env.get("SLACK_BOT_TOKEN") || "";
+const SLACK_SIGNING_SECRET = Deno.env.get("SLACK_SIGNING_SECRET") || "";
 
 // Given a Slack request timestamp (seconds since epoch; no milliseconds),
 // determine if it is too old (>= 5 min from "now").
+// This protects against potential replay attacks.
 const old = (timestamp: string): boolean => {
   const now = Math.floor(Date.now() / 1000); // No millis, vanilli.
   const splay = Math.abs(now - parseInt(timestamp));
   return splay >= 300; // 5 minutes;
 };
 
-const isValidSlackEvent = (body, headers: Headers): boolean => {
+// https://api.slack.com/authentication/verifying-requests-from-slack
+const isValidSlackRequest = (body, headers: Headers): boolean => {
   const bodyAsString = JSON.stringify(body);
   const timestamp = headers.get("x-slack-request-timestamp");
   const slackSignature = headers.get("x-slack-signature");
@@ -25,10 +27,8 @@ const isValidSlackEvent = (body, headers: Headers): boolean => {
   }
 
   const [slackHashVersion, slackHash] = slackSignature.split("=");
-  // FIXME: Grab this from the environment.
-  const signingSecret = "43c891e7a822a9f3a2055e7367ac3c51";
   const baseString = `${slackHashVersion}:${timestamp}:${bodyAsString}`
-  const calculatedHash = hmac("sha256", signingSecret, baseString, "utf8", "hex");
+  const calculatedHash = hmac("sha256", SLACK_SIGNING_SECRET, baseString, "utf8", "hex");
   if (calculatedHash == slackHash) {
     return true;
   }
@@ -59,7 +59,7 @@ export const handler: Handlers = {
       );
     }
 
-    if (!isValidSlackEvent(eventBody, req.headers)) {
+    if (!isValidSlackRequest(eventBody, req.headers)) {
       console.log("Malformed or malicious event!");
       const msg = { message: "Invalid or malformed input" };
       return new Response(
@@ -91,7 +91,7 @@ export const handler: Handlers = {
         const { type } = eventBody.event;
         if (type == "app_mention") {
           const headers = new Headers(baseResponseHeaders);
-          headers.set("authorization", `Bearer ${botToken}`);
+          headers.set("authorization", `Bearer ${SLACK_BOT_TOKEN}`);
           const { text, user, channel } = eventBody.event;
           // We likely need an expression to match the bot's ID explicitly so
           // that we can filter it out and avoid an app_mention loop condition.
