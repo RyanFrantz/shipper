@@ -75,11 +75,8 @@ export const handler: Handlers = {
               body: JSON.stringify(msg)
             }
           );
-          // TODO: Test slackResp for ok-ness.
-          console.log(slackResponse);
-          console.log(slackResponse.ok);
-          if (!slackResponse.ok) {
-            console.log(`Error posting message: ${slackResponse.error}`)
+          if (!slackResponse?.ok) {
+            console.log(`Error posting message: ${slackResponse?.error}`)
           }
         }
         // Reply 200 OK all the time.
