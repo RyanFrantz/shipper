@@ -64,9 +64,11 @@ export const handler: Handlers = {
           const match = text.match(re);
           // TODO: If the message doesn't match this expression, let's reply
           // with a help message illustrating how we work.
+          let msgText = `<@${user}> said: \`${match.groups.user_message}\``
+          msgText += "\nNow with newlines!";
           const msg = {
             channel: channel,
-            text: `<@${user}> said: \`${match.groups.user_message}\``
+            text: msgText
           };
           const slackResponse = await fetch("https://slack.com/api/chat.postMessage",
             {
