@@ -65,7 +65,10 @@ export const handler: Handlers = {
           // TODO: If the message doesn't match this expression, let's reply
           // with a help message illustrating how we work.
           let msgText = `<@${user}> said: \`${match.groups.user_message}\``
-          msgText += "\nNow with newlines!";
+          msgText += "\nHere's what I've got coming in the near future:";
+          msgText += "\n`@shipper new` - Add an item to the list of awesome you intend to ship";
+          msgText += "\n`@shipper list` - List the awesome things you have and will ship";
+          msgText += "\n`@shipper ship` - Tell me you've shipped something and celebrate!"
           const msg = {
             channel: channel,
             text: msgText
