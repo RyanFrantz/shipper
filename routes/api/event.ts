@@ -67,8 +67,9 @@ export const handler: Handlers = {
           let msgText = `<@${user}> said: \`${match.groups.user_message}\``
           msgText += "\nHere's what I've got coming in the near future:";
           msgText += "\n`@shipper new` - Add an item to the list of awesome you intend to ship";
-          msgText += "\n`@shipper list` - List the awesome things you have and will ship";
+          msgText += "\n`@shipper list` - List the awesome things you have, and will, ship";
           msgText += "\n`@shipper ship` - Tell me you've shipped something and celebrate!"
+          msgText += "\n`@shipper help` - Prints this message"
           const msg = {
             channel: channel,
             text: msgText
